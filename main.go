@@ -2,32 +2,46 @@ package main
 
 import (
     "net/http"
+<<<<<<< HEAD
     "log"
     "os"
     "io/ioutil"
+=======
+    "os"
+>>>>>>> main
     "fmt"
     )
 
 func main(){
     http.HandleFunc("/shutdown", shutDownServer)
     http.HandleFunc("/", startServer)
+<<<<<<< HEAD
     http.HandleFunc("/activate", startWebCrawler)
+=======
+>>>>>>> main
     http.ListenAndServe(":8080", nil)
 }
 
 // This function is in charge of gracefully shutting down the server
 func shutDownServer(res http.ResponseWriter, req *http.Request){
+<<<<<<< HEAD
     log.Println("Shutting Down Server")
     os.Exit(0)
 }
 
 
+=======
+    os.Exit(0)
+}
+
+>>>>>>> main
 // This function is in charge of handling requests to the homepage
 func startServer(res http.ResponseWriter, req *http.Request){
     if req.URL.Path != "/" {
         http.NotFound(res, req)
         return
     }
+<<<<<<< HEAD
     log.Println("Something hit the homepage!")
     fmt.Fprint(res, "We are in the homepage")
 }
@@ -54,3 +68,7 @@ func startWebCrawler(res http.ResponseWriter, req *http.Request) {
 
     fmt.Println(string(body))
 }
+=======
+    fmt.Fprint(res, "We are in the homepage")
+}
+>>>>>>> main
