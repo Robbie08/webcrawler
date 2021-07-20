@@ -6,10 +6,12 @@ import (
     "io/ioutil"
     "log"
     "fmt"
+    "github.com/Robbie08/webcrawler/pkg/crawler"
     )
 
 func main(){
     log.Println("Server is running!")
+    crawler.PrintFromCrawler("Diggity Daug")
     http.HandleFunc("/shutdown", shutDownServer)
     http.HandleFunc("/run", runWebcrawler)
     http.HandleFunc("/", startServer)
