@@ -3,7 +3,6 @@ package crawler
 import (
     "fmt"
     "net/http"
-    "net/url"
 )
 
 func PrintFromCrawler(val string){
