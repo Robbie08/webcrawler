@@ -2,7 +2,7 @@ package crawler
 
 import (
     "fmt"
-    "net.http"
+    "net/http"
     "net/url"
 )
 
