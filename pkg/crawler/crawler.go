@@ -6,7 +6,9 @@ import (
     "net/url"
 )
 
-
+func PrintFromCrawler(val string){
+    fmt.Println("Hello ", val)
+}
 
 // Grab package using Get request. 
 func getRequest(url string) (*http.Response, error){
