@@ -24,6 +24,11 @@ type Scraper interface {
 // Dummy function to help test if we are still connected to main.go
 func PrintFromCrawler(val string){
     fmt.Println("Hello ", val)
+
+    // this code will test our current progrss!
+    resp, _ := getRequest("https://ortizrobert.herokuapp.com/")
+    doc, _ := goquery.NewDocumentFromResponse(resp)
+    links := scrapeLinks(doc)
 }
 
 // Grab package using Get request.
@@ -45,3 +50,28 @@ func getRequest(url string) (*http.Response, error){
 
     return res, nil
 }
+
+func scrapeLinks(doc *goquery.Document) []string {
+    urlsFound := []string{} // this array will keep the urls we have found
+
+    // If we have a non nil document then we can begin searching through it
+    if doc != nil {
+        doc.Find("a").Each(func(i int, s *goquery.Selection){
+            res, _ := s.Attr("href")
+            urlsFound = append(urlsFound, res)
+        })
+    }
+
+    // if we don't find any urls, let us log that
+    if len(urlsFound) == 0 {
+        log.Println("No URLs found on this webpage")
+        return
+    }else{ // this statement is for testing purposes
+        for _, elem := range(urlsFound) {
+            fmt.Println(elem)
+        }
+    }
+
+    return urlsFound
+}
+
