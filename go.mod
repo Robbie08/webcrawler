@@ -1,5 +1,8 @@
-module webcrawler
+module github.com/Robbie08/webcrawler
 
 go 1.13
 
-require github.com/Robbie08/webcrawler v0.0.0-20210720061211-f51f841d6117 // indirect
+require (
+	github.com/PuerkitoBio/goquery v1.7.1
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
+)
