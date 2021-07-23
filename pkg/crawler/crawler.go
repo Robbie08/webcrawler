@@ -1,77 +1,74 @@
 package crawler
 
 import (
-    "fmt"
-    "net/http"
-    "github.com/PuerkitoBio/goquery"
+	"fmt"
+	"golang.org/x/net/html"
+	"log"
+	"net/http"
+	"strings"
 )
 
-
-// Basic layout of object that will
-// contain our scraped data
-type ScrapedData {
-    URL     string
-    Title   string
-    H1      string
+func Dummy() {
+	fmt.Println("Hello Daug")
 }
 
-
-// let's create an interface to help multi-file data transfer
-type Scraper interface {
-    ScrapePage(*goquery.Document) ScrapedData
+// Find and return the href value from the given token
+func scrapeHref(tkn html.Token) (ok bool, href string) {
+	// we will iterate through attributes only returning the href value
+	for _, attr := range tkn.Attr {
+		if attr.Key == "href" {
+			href = attr.Val
+			ok = true
+		}
+	}
+	return // we will make a naked return
 }
 
-// Dummy function to help test if we are still connected to main.go
-func PrintFromCrawler(val string){
-    fmt.Println("Hello ", val)
+// function in charge of crawling and scraping a given url
+func crawl(url string, msg chan string, done chan bool) {
+	resp, err := http.Get(url) // make a Get request and returns the response from url
 
-    // this code will test our current progrss!
-    resp, _ := getRequest("https://ortizrobert.herokuapp.com/")
-    doc, _ := goquery.NewDocumentFromResponse(resp)
-    links := scrapeLinks(doc)
+	defer func() {
+		done <- true // we publish to the done chanel that we are done crawling
+	}()
+
+	if err != nil {
+		log.Println("Oops! Error when getting response from: ", url)
+		return
+	}
+
+	myBod := resp.Body  // get the body of the response
+	defer myBod.Close() // make sure to close out body when we are done operating on it
+
+	tokenizedBody := html.NewTokenizer(myBod) // tokenize the HTML code into TAGs
+
+	// now we must iterate through the tokenized data and keep track of the <a> TAGs
+	for {
+		tk := tokenizedBody.Next() // move to the next item
+
+		switch {
+		case tk == html.ErrorToken:
+			return // finish here if there is an error with our data
+		case tk == html.StartTagToken:
+			tkn := tokenizedBody.Token() // grab token
+
+			// let's only keep the <a> Tokens
+
+			if !(tkn.Data == "a") {
+				continue // if the token we currently have is not "a" mv to next token
+			}
+
+			ok, fetchedUrl := scrapeHref(tkn) // we will use our created function to scrape the href
+
+			// Guard againts an <a> tag that doesn't actually have an href inside
+			if !ok {
+				continue
+			}
+
+			hasProto := strings.Index(fetchedUrl, "http") == 0 // store as bool if the url contains http
+			if hasProto {
+				msg <- fetchedUrl // send the fetched url to the msg channel
+			}
+		}
+	}
 }
-
-// Grab package using Get request.
-// This is the start of the scraping process and will help us
-// gain access to the HTML code from the site.
-func getRequest(url string) (*http.Response, error){
-    target := &http.Client{}
-    req, _ := http.NewRequest("Get", url, nil)
-
-    // we need to wrap our request with a googlebot agent 
-    // to avoid being detected by client.
-    req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://.google.com/bot.html)")
-
-    res, err := target.Do(req) // perform the request on target 
-
-    if err != nil {
-        return nil, err
-    }
-
-    return res, nil
-}
-
-func scrapeLinks(doc *goquery.Document) []string {
-    urlsFound := []string{} // this array will keep the urls we have found
-
-    // If we have a non nil document then we can begin searching through it
-    if doc != nil {
-        doc.Find("a").Each(func(i int, s *goquery.Selection){
-            res, _ := s.Attr("href")
-            urlsFound = append(urlsFound, res)
-        })
-    }
-
-    // if we don't find any urls, let us log that
-    if len(urlsFound) == 0 {
-        log.Println("No URLs found on this webpage")
-        return
-    }else{ // this statement is for testing purposes
-        for _, elem := range(urlsFound) {
-            fmt.Println(elem)
-        }
-    }
-
-    return urlsFound
-}
-
