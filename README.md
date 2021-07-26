@@ -10,3 +10,14 @@ This webcrawler application will scrape links from a given source, cache them an
 `make build` to build and create the executable.
 * Upon success you can now run the application by using the command `make run`.
 * By default a sever will spin up on `localhost:8080`
+
+### Using the App
+This Application is currently under v1.0 and this crawler can only scrape through directed websites we set.
+
+* Once the application is running, you can open up [Postman](https://www.postman.com/) or a web browser.
+* To Access The Home Page: `http://localhost:8080/`
+* To Spin up Crawler : `http://localhost:8080/run`
+* To Shutdown Server Gracefully: `http://localhost:8080/shutdown`
+
+Results from webcrawler will appear in your terminal where the server is running.
+
