@@ -25,7 +25,7 @@ func scrapeHref(tkn html.Token) (ok bool, href string) {
 }
 
 // function in charge of crawling and scraping a given url
-func crawl(url string, msg chan string, done chan bool) {
+func Crawl(url string, msg chan string, done chan bool) {
 	resp, err := http.Get(url) // make a Get request and returns the response from url
 
 	defer func() {
