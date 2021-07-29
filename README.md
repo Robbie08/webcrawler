@@ -12,7 +12,7 @@ This webcrawler application will scrape links from a given source, cache them an
 * By default a sever will spin up on `localhost:8080`
 
 ### Using the App
-This Application is currently under v1.0 and this crawler can only scrape through directed websites we set.
+This Application is currently under v0.1 and this crawler can only scrape through directed websites we set.
 
 * Once the application is running, you can open up [Postman](https://www.postman.com/) or a web browser.
 * To Access The Home Page: `http://localhost:8080/`
