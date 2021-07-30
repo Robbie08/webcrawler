@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Robbie08/webcrawler/pkg/crawler"
-	"log"
+	log "github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 )
 
 func main() {
-	log.Println("Server is running!")
+	log.SetFormatter(&log.JSONFormatter{}) // making our logs into JSON format
+	log.SetOutput(ioutil.Discard)          // COMMENT THIS LINE OUT IF YOU WANT TO VIEW THE LOGS also "io/ioutil"
 	crawler.Dummy()
 	http.HandleFunc("/shutdown", shutDownServer)
 	http.HandleFunc("/run", runWebcrawler)
@@ -27,15 +29,17 @@ func runWebcrawler(res http.ResponseWriter, req *http.Request) {
 
 // This function is in charge of gracefully shutting down the server
 func shutDownServer(res http.ResponseWriter, req *http.Request) {
-	log.Println("Server shutting down...")
+	log.Info("Server shutting down gracefully...")
+	fmt.Println("Server shutting down gracefully...")
 	os.Exit(0)
 }
 
 // This function is in charge of handling requests to the homepage
 func startServer(res http.ResponseWriter, req *http.Request) {
-	log.Println("Someone hit the homepage")
+	log.Info("Someone hit the homepage")
 	if req.URL.Path != "/" {
 		http.NotFound(res, req)
+		log.Info("Page not found")
 		return
 	}
 	fmt.Fprint(res, "You are home")
@@ -96,6 +100,7 @@ func handleIP(res http.ResponseWriter, r *http.Request) {
 	ip := grabIP(r)
 
 	if ip == "" {
+		log.Warn("IP address not found")
 		fmt.Println("No IP found ...")
 		return
 	}
@@ -113,14 +118,35 @@ func grabIP(r *http.Request) string {
 	ip := r.Header.Get("X-REAL-IP")
 
 	if ip != "" {
+		log.WithFields(
+			log.Fields{
+				"IP":   ip,
+				"Type": "X-REAL-IP",
+			},
+		).Info("IP Address fetched")
 		return ip
 	}
 
 	// if we could not get the X-REAL-IP then get the "forwarded-for" ip
 	ip = r.Header.Get("X-FORWARDED-FOR")
+
 	if ip != "" {
+		log.WithFields(
+			log.Fields{
+				"IP":   ip,
+				"Type": "X-FORWARDED-FOR-IP",
+			},
+		).Info("IP Address fetched")
 		return ip
 	}
 
-	return r.RemoteAddr // return an empty string I guess
+	// if we couldn't fetch any ip by now, then we can just assume local host [for now]
+	ip = r.RemoteAddr
+	log.WithFields(
+		log.Fields{
+			"IP":   ip,
+			"Type": "REMOTE-IP",
+		},
+	).Info("IP Address fetched")
+	return ip
 }
