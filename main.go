@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Robbie08/webcrawler/pkg/crawler"
 	"log"
@@ -19,6 +20,8 @@ func main() {
 }
 
 func runWebcrawler(res http.ResponseWriter, req *http.Request) {
+	printBanner()
+	handleIP(res, req)
 	runCrawler() // start the webcrawler
 }
 
@@ -40,7 +43,6 @@ func startServer(res http.ResponseWriter, req *http.Request) {
 
 // This function will scrape the URLs from the website passed in as command line arguments
 func runCrawler() {
-	printBanner()
 	fmt.Println("\nStarting up crawler ...")
 	time.Sleep(3 * time.Second)
 
@@ -85,4 +87,40 @@ func printBanner() {
 	fmt.Println("| | / / / __ \\/ / _ \\/ __ \\/ __/  / /   / ___/ __ `/ | /| / / / _ \\/ ___/")
 	fmt.Println("| |/ / / /_/ / /  __/ / / / /_   / /___/ /  / /_/ /| |/ |/ / /  __/ /    ")
 	fmt.Println("|___/_/\\____/_/\\___/_/ /_/\\__/   \\____/_/   \\__,_/ |__/|__/_/\\___/_/     ")
+}
+
+func handleIP(res http.ResponseWriter, r *http.Request) {
+	res.Header().Add("Content-Type", "application/json")
+
+	// get and verify if we got an ip
+	ip := grabIP(r)
+
+	if ip == "" {
+		fmt.Println("No IP found ...")
+		return
+	}
+
+	resp, _ := json.Marshal(map[string]string{
+		"ip": ip,
+	})
+	fmt.Println("\nYour IP :) -> ", ip)
+	res.Write(resp)
+}
+
+// Function that grabs the requests IP Address by reading from the Header
+func grabIP(r *http.Request) string {
+	// get the ip from the X-REAL-IP header
+	ip := r.Header.Get("X-REAL-IP")
+
+	if ip != "" {
+		return ip
+	}
+
+	// if we could not get the X-REAL-IP then get the "forwarded-for" ip
+	ip = r.Header.Get("X-FORWARDED-FOR")
+	if ip != "" {
+		return ip
+	}
+
+	return r.RemoteAddr // return an empty string I guess
 }
