@@ -9,7 +9,7 @@ import (
 )
 
 func Dummy() {
-	fmt.Println("Hello Daug")
+	fmt.Println("Hello Friend!")
 }
 
 // Find and return the href value from the given token
